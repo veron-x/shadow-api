@@ -12,47 +12,41 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FlyListener implements Listener {
-    private final List<String> restrictedWorlds = Arrays.asList("duel1", "duel2", "duel3", "duel4");
 
-    public FlyListener() {
-    }
+    private static final List<String> RESTRICTED_WORLDS = Arrays.asList("duel1", "duel2", "duel3", "duel4");
 
-    @EventHandler(
-            priority = EventPriority.HIGHEST
-    )
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onFlyCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
-        String worldName = player.getWorld().getName().toLowerCase();
         String command = event.getMessage().toLowerCase();
-        if (this.restrictedWorlds.contains(worldName) && (command.equals("/fly") || command.startsWith("/fly "))) {
+
+        if (isRestrictedWorld(player) && isFlyCommand(command)) {
             event.setCancelled(true);
         }
-
     }
 
-    @EventHandler(
-            priority = EventPriority.MONITOR
-    )
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onWorldChange(PlayerChangedWorldEvent event) {
-        Player player = event.getPlayer();
-        String worldName = player.getWorld().getName().toLowerCase();
-        if (this.restrictedWorlds.contains(worldName) && player.getAllowFlight()) {
-            player.setAllowFlight(false);
-            player.setFlying(false);
-        }
-
+        revokeFlightIfRestricted(event.getPlayer());
     }
 
-    @EventHandler(
-            priority = EventPriority.MONITOR
-    )
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        String worldName = player.getWorld().getName().toLowerCase();
-        if (this.restrictedWorlds.contains(worldName) && player.getAllowFlight()) {
+        revokeFlightIfRestricted(event.getPlayer());
+    }
+
+    private void revokeFlightIfRestricted(Player player) {
+        if (isRestrictedWorld(player) && player.getAllowFlight()) {
             player.setAllowFlight(false);
             player.setFlying(false);
         }
+    }
 
+    private boolean isRestrictedWorld(Player player) {
+        return RESTRICTED_WORLDS.contains(player.getWorld().getName().toLowerCase());
+    }
+
+    private boolean isFlyCommand(String command) {
+        return command.equals("/fly") || command.startsWith("/fly ");
     }
 }
