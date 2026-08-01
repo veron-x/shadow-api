@@ -1,0 +1,6 @@
+name: ShadowApi
+version: '1.0'
+main: sh.veron.shadow.ShadowApi
+api-version: '1.16'
+load: STARTUP
+authors: [ Veron ]
